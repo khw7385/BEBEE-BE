@@ -28,11 +28,17 @@ public class EventConfig {
     }
 
     @Bean
+    public ProcessedEventManager processedEventManager(ProcessedEventRepository processedEventRepository) {
+        return new ProcessedEventManager(processedEventRepository);
+    }
+
+    @Bean
     public SqsEventListener sqsEventListener(
             EventTypeMapper eventTypeMapper,
             EventHandlerRegistry eventHandlerRegistry,
+            ProcessedEventManager processedEventManager,
             ObjectMapper objectMapper){
-        return new SqsEventListener(objectMapper, eventTypeMapper, eventHandlerRegistry);
+        return new SqsEventListener(objectMapper, eventTypeMapper, eventHandlerRegistry, processedEventManager);
     }
 
     @Bean
@@ -44,6 +50,4 @@ public class EventConfig {
     public SnsEventPublisher snsEventPublisher(SnsClient snsClient, ObjectMapper objectMapper){
         return new SnsEventPublisher(snsClient, objectMapper);
     }
-
-
 }

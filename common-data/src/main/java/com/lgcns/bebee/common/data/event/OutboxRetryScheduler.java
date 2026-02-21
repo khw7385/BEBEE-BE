@@ -21,7 +21,7 @@ public class OutboxRetryScheduler {
     private static final int BATCH_SIZE = 100;
     private static final int[] RETRY_DELAYS_SECONDS = {30, 60, 120};
 
-    @Scheduled(fixedDelay = 60 * 60 * 1000)
+    @Scheduled(fixedDelay = 60 * 1000)
     @Transactional
     public void retryFailedOutboxes() {
         log.debug("=== Outbox 재처리 스케줄러 시작 ===");

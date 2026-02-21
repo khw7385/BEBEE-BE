@@ -17,15 +17,28 @@ public class EventConfig {
     @Bean
     public DomainEventPublisher domainEventPublisher(
             OutboxRepository outboxRepository,
-            ApplicationEventPublisher eventPublisher,
-            ObjectMapper objectMapper
-    ){
-        return new DomainEventPublisher(outboxRepository, eventPublisher, objectMapper);
+            ApplicationEventPublisher springEventPublisher,
+            ObjectMapper objectMapper) {
+        return new DomainEventPublisher(outboxRepository, springEventPublisher, objectMapper);
     }
 
     @Bean
     public EventHandlerRegistry eventHandlerRegistry(List<EventHandler<? extends DomainEvent>> handlers){
         return new EventHandlerRegistry(handlers);
+    }
+
+    @Bean
+    public ProcessedEventManager processedEventManager(ProcessedEventRepository processedEventRepository) {
+        return new ProcessedEventManager(processedEventRepository);
+    }
+
+    @Bean
+    public SqsEventListener sqsEventListener(
+            EventTypeMapper eventTypeMapper,
+            EventHandlerRegistry eventHandlerRegistry,
+            ProcessedEventManager processedEventManager,
+            ObjectMapper objectMapper){
+        return new SqsEventListener(objectMapper, eventTypeMapper, eventHandlerRegistry, processedEventManager);
     }
 
     @Bean
@@ -36,23 +49,5 @@ public class EventConfig {
     @Bean
     public SnsEventPublisher snsEventPublisher(SnsClient snsClient, ObjectMapper objectMapper){
         return new SnsEventPublisher(snsClient, objectMapper);
-    }
-
-    @Bean
-    public SqsEventListener sqsEventListener(
-            EventTypeMapper eventTypeMapper,
-            EventHandlerRegistry eventHandlerRegistry,
-            ObjectMapper objectMapper){
-        return new SqsEventListener(objectMapper, eventTypeMapper, eventHandlerRegistry);
-    }
-
-    @Bean
-    public OutboxRetryScheduler outboxRetryScheduler(
-            OutboxRepository outboxRepository,
-            EventPublisher eventPublisher,
-            EventTypeMapper eventTypeMapper,
-            ObjectMapper objectMapper) {
-
-        return new OutboxRetryScheduler(outboxRepository, eventPublisher, objectMapper, eventTypeMapper);
     }
 }

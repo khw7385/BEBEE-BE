@@ -11,6 +11,11 @@ import java.util.List;
 @Component
 public class EventConfig {
     @Bean
+    public ProcessedEventManager processedEventManager(ProcessedEventRepository processedEventRepository) {
+        return new ProcessedEventManager(processedEventRepository);
+    }
+
+    @Bean
     public EventHandlerRegistry eventHandlerRegistry(List<EventHandler<? extends DomainEvent>> handlers){
         return new EventHandlerRegistry(handlers);
     }
@@ -19,7 +24,8 @@ public class EventConfig {
     public SqsEventListener sqsEventListener(
             EventTypeMapper eventTypeMapper,
             EventHandlerRegistry eventHandlerRegistry,
+            ProcessedEventManager processedEventManager,
             ObjectMapper objectMapper){
-        return new SqsEventListener(objectMapper, eventTypeMapper, eventHandlerRegistry);
+        return new SqsEventListener(objectMapper, eventTypeMapper, eventHandlerRegistry, processedEventManager);
     }
 }

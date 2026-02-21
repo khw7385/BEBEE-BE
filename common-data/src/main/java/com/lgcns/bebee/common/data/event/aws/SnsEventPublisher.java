@@ -28,7 +28,7 @@ public class SnsEventPublisher implements EventPublisher {
         try {
             String messagePayload = objectMapper.writeValueAsString(event);
 
-            log.info("SNS 발행 시작 - Topic: {}, Event: {}", topicArn, event.eventType());
+            log.info("이벤트 발행 시작 - Topic: {}, Event: {}", topicArn, event.eventType());
 
             PublishRequest request = PublishRequest.builder()
                     .topicArn(topicArn)
@@ -43,10 +43,10 @@ public class SnsEventPublisher implements EventPublisher {
 
             snsClient.publish(request);
 
-            log.info("SNS 발행 완료 - Event: {}, 발행 시간: {}", event.eventType(), event.producedAt());
+            log.info("이벤트 발행 완료 - Event: {}, 발행 시간: {}", event.eventType(), event.producedAt());
         } catch (JsonProcessingException e) {
-            log.error("SNS 이벤트 발행 실패 - Event: {}", event.eventType(), e);
-            throw new RuntimeException("SNS 이벤트 발행 실패", e);
+            log.error("이벤트 발행 실패 - Event: {}", event.eventType(), e);
+            throw new RuntimeException("이벤트 이벤트 발행 실패", e);
         }
     }
 }

@@ -28,6 +28,20 @@ public class EventConfig {
     }
 
     @Bean
+    public ProcessedEventManager processedEventManager(ProcessedEventRepository processedEventRepository) {
+        return new ProcessedEventManager(processedEventRepository);
+    }
+
+    @Bean
+    public SqsEventListener sqsEventListener(
+            EventTypeMapper eventTypeMapper,
+            EventHandlerRegistry eventHandlerRegistry,
+            ProcessedEventManager processedEventManager,
+            ObjectMapper objectMapper){
+        return new SqsEventListener(objectMapper, eventTypeMapper, eventHandlerRegistry, processedEventManager);
+    }
+
+    @Bean
     public SpringEventListener springEventListener(EventPublisher eventPublisher, OutboxRepository outboxRepository){
         return new SpringEventListener(eventPublisher, outboxRepository);
     }
@@ -35,22 +49,5 @@ public class EventConfig {
     @Bean
     public SnsEventPublisher snsEventPublisher(SnsClient snsClient, ObjectMapper objectMapper){
         return new SnsEventPublisher(snsClient, objectMapper);
-    }
-
-    @Bean
-    public SqsEventListener sqsEventListener(
-            EventTypeMapper eventTypeMapper,
-            EventHandlerRegistry eventHandlerRegistry,
-            ObjectMapper objectMapper){
-        return new SqsEventListener(objectMapper, eventTypeMapper, eventHandlerRegistry);
-    }
-
-    @Bean
-    public OutboxRetryScheduler outboxRetryScheduler(
-            OutboxRepository outboxRepository,
-            EventPublisher eventPublisher,
-            EventTypeMapper eventTypeMapper,
-            ObjectMapper objectMapper) {
-        return new OutboxRetryScheduler(outboxRepository, eventPublisher, objectMapper, eventTypeMapper);
     }
 }

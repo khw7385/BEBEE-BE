@@ -70,7 +70,7 @@ spring:
   # Flyway 설정
   flyway:
     # Flyway 활성화
-    enabled: true
+    enabled: false
     # 마이그레이션 파일 위치
     locations:
       - classpath:db/migration
