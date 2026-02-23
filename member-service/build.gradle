@@ -52,16 +52,8 @@ dependencies {
 
     implementation 'software.amazon.awssdk:sts:2.40.17'
 
-    // AWS SDK v2 S3 -    // AWS SDK S3 제거 (HTTP 기반 다운로드로 대체)
-    // implementation 'software.amazon.awssdk:s3:2.20.162'
-
     // Spring Actuator - 어플리케이션 모니터링 및 관리 엔드포인트를 제공
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
-    // Spring Cloud AWS Starter - AWS 서비스 통합 위한 스타터 의존성
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sns:3.4.2'
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.4.2'
-    implementation 'software.amazon.awssdk:sts:2.40.17'
 
     // 테스트용 (MockMultipartFile 등을 여기서만 사용)
     testImplementation 'org.springframework:spring-test'
