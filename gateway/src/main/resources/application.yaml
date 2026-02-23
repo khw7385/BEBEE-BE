@@ -26,6 +26,7 @@ gateway:
       - /swagger-ui/**
       - /v3/api-docs/**
       - /actuator/**
+      - /api/*/actuator/**
 
 # Swagger/OpenAPI 설정
 springdoc:
