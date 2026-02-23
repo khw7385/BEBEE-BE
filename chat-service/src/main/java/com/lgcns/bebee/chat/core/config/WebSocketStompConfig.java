@@ -2,12 +2,17 @@ package com.lgcns.bebee.chat.core.config;
 
 import com.lgcns.bebee.chat.core.properties.WebSocketStompProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
+import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 import static com.lgcns.bebee.chat.core.utils.StompDestinationUtils.*;
 
@@ -30,7 +35,10 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes(PUBLISH_PREFIX)
-                .enableSimpleBroker(SUBSCRIBE_PREFIX);
+                .enableSimpleBroker(SUBSCRIBE_PREFIX)
+//                .setHeartbeatValue(new long[]{10000, 10000})
+//                .setTaskScheduler(heartBeatScheduler())
+        ;
     }
 
     /**
@@ -42,5 +50,28 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(webSocketAuthInterceptor);
+    }
+
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+        registry.setSendTimeLimit(120 * 1000)
+                .setSendBufferSizeLimit(512 * 1024)
+                .setTimeToFirstMessage(30000);
+    }
+
+//    @Bean
+//    public TaskScheduler heartBeatScheduler(){
+//        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+//        scheduler.setPoolSize(1);
+//        scheduler.setThreadNamePrefix("ws-heartbeat-thread-");
+//        scheduler.initialize();
+//        return scheduler;
+//    }
+
+    @Bean
+    public ServletServerContainerFactoryBean createWebSocketContainer() {
+        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+        container.setMaxSessionIdleTimeout(60 * 1000L);
+        return container;
     }
 }

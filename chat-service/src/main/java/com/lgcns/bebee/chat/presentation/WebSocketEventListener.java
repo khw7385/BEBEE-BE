@@ -9,6 +9,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import java.security.Principal;
 
@@ -28,20 +29,27 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketSubscribeListener(SessionSubscribeEvent event){
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String destination = headerAccessor.getDestination();
+
         Principal principal = headerAccessor.getUser();
 
-        if (principal != null && destination != null && destination.startsWith("/sub/member:")) {
-            Long memberId = Long.parseLong(principal.getName());
-            log.info("STOMP SUBSCRIBE - Member ID: {}, Destination: {}, Session ID: {}",
-                    memberId, destination, headerAccessor.getSessionId());
+        Long memberId = Long.parseLong(principal.getName());
+        log.info("STOMP SUBSCRIBE - Member ID: {}, Session ID: {}",
+                memberId, headerAccessor.getSessionId());
 
-            // Redis 채널 구독 시작
-            subscribeChannelUseCase.execute(new SubscribeChannelOnConnectionUseCase.Param(memberId));
-        } else {
-            log.warn("STOMP SUBSCRIBE invalid - Destination: {}, Principal: {}, Session ID: {}",
-                    destination, principal != null, headerAccessor.getSessionId());
-        }
+        // Redis 채널 구독 시작
+        subscribeChannelUseCase.execute(new SubscribeChannelOnConnectionUseCase.Param(memberId));
+    }
+
+    @EventListener
+    public void handleWebSocketUnsubscribeListener(SessionUnsubscribeEvent event){
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        Principal principal = headerAccessor.getUser();
+
+        Long memberId = Long.parseLong(principal.getName());
+
+        log.info("WebSocket disconnected - Member ID: {}, Session ID: {}", memberId, headerAccessor.getSessionId());
+
+        unsubscribeChannelUseCase.execute(new UnsubscribeChannelOnConnectionUseCase.Param(memberId));
     }
 
     /**

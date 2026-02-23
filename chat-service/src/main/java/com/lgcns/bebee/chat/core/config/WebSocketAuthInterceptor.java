@@ -7,11 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
+
+import java.security.Principal;
 
 @Slf4j
 @Component
@@ -32,28 +35,55 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-            String authHeader = accessor.getFirstNativeHeader("Authorization");
+        log.info("수신된 STOMP 명령: {}", accessor.getCommand());
 
-            // Authorization 헤더에서 토큰 추출
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
+        if(accessor == null){
+            log.error("STOMP accessor가 NULL 입니다. 파싱할 수 없는 메시지 형식입니다.");
+            throw new MessageDeliveryException("잘못된 메시지 형식입니다.");
+        }
 
-                try {
-                    Claims claims = jwtTokenValidator.parseClaims(token);
-                    Long memberId = jwtTokenValidator.extractMemberId(claims);
-
-                    MemberPrincipal principal = new MemberPrincipal(memberId);
-                    accessor.setUser(principal);
-                    log.info("WebSocket authentication successful - Member ID: {}", memberId);
-                } catch (JwtException e) {
-                    log.warn("WebSocket authentication failed - Invalid token: {}", e.getMessage());
-                }
-            } else {
-                log.warn("WebSocket connection without authentication token");
-            }
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            handleConnectMessage(accessor);
+        }else if(StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+            handleSubscribeMessage(accessor);
         }
 
         return message;
+    }
+
+    private void handleConnectMessage(StompHeaderAccessor accessor){
+        String authHeader = accessor.getFirstNativeHeader("Authorization");
+
+        // Authorization 헤더에서 토큰 추출
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+
+            try {
+                Claims claims = jwtTokenValidator.parseClaims(token);
+                Long memberId = jwtTokenValidator.extractMemberId(claims);
+
+                MemberPrincipal principal = new MemberPrincipal(memberId);
+                accessor.setUser(principal);
+                log.info("WebSocket authentication successful - Member ID: {}", memberId);
+            } catch (JwtException e) {
+                log.warn("WebSocket authentication failed - Invalid token: {}", e.getMessage());
+                throw new MessageDeliveryException("유효하지 않은 인증 토큰입니다.");
+            }
+        } else {
+            log.warn("WebSocket connection without authentication token");
+            throw new MessageDeliveryException("인증 토큰이 필요합니다.");
+        }
+    }
+
+    private void handleSubscribeMessage(StompHeaderAccessor accessor){
+        String destination = accessor.getDestination();
+        Principal principal = accessor.getUser();
+
+        if(principal == null || destination == null || !destination.startsWith("/sub/member:")){
+            log.warn("STOMP SUBSCRIBE denied - Missing principal or destination. Session ID: {}",
+                    accessor.getSessionId());
+
+            throw new MessageDeliveryException("구독 정보가 유효하지 않습니다.");
+        }
     }
 }

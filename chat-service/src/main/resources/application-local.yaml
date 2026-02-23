@@ -63,7 +63,7 @@ spring:
 
   cloud:
     aws:
-      endpoint: http://localhost:4566
+      endpoint: ${AWS_ENDPOINT:http://localhost:4566}
       region:
         static: ap-northeast-2
       credentials:

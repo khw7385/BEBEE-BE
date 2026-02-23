@@ -52,7 +52,6 @@ public class SendChatMessageUseCase implements UseCase<SendChatMessageUseCase.Pa
         // Redis를 통해 발신자와 수신자에게 메시지 발행
         messagePublisher.publishToMember(param.senderId, param.receiverId, chat);
 
-
         return null;
     }
 
