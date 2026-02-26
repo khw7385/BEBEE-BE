@@ -1,5 +1,82 @@
+# 🍯 비비 (Be Bee)
+백엔드 서버 레포지토리입니다.
+<br/>
 
-## 🚀 시작하기
+<img width="1600" alt="비비" src="https://github.com/user-attachments/assets/ff195871-0a1a-44f6-8f5e-3e6e35f24546" />
+
+<br/><br/>
+
+## 1. 프로젝트 개요
+<img width="1600" alt="프로젝트 개요" src="https://github.com/user-attachments/assets/ee5a9b98-faa3-4278-bd2c-a99c6b7d76e5" />
+
+### 1-1. 서비스 시연
+[🎥 시연 영상 보러가기](https://youtu.be/mCwxWMNSfpc)
+
+<img width="1600" alt="시연 영상" src="https://github.com/user-attachments/assets/5570ded0-201d-4c92-810c-1047514deed4" />
+
+### 1-2. 스크린리더 적용 시연 영상
+[🎥 시연 영상 보러가기](https://youtu.be/h2tctPD_5qY)
+
+<img width="1600" alt="스크린 리더 시연 영상" src="https://github.com/user-attachments/assets/34c0db8e-6bc4-44ab-910e-a4e428f14cef" />
+
+<br/><br/>
+
+## 2. 기술스택
+<img width="5760" height="3240" alt="기술스택" src="https://github.com/user-attachments/assets/925f6bd5-da82-4cd4-aa66-a05eb5d8b0a6" />
+
+<br/><br/>
+
+## 3. 시스템 아키텍처
+<img width="5760" height="3240" alt="백엔드 시스템 아키텍처" src="https://github.com/user-attachments/assets/3d17765e-3fe3-4f41-972e-e41dcbafff19" />
+
+<br/><br/>
+
+---
+
+<br/>
+
+# 시작하기
+
+## 📁 프로젝트 구조
+
+```shell
+├── common // 공통 모듈
+│   ├── build.gradle
+│   └── src/
+├── common-data // DB와 연관된 공통 모듈
+│   ├── build.gradle
+│   └── src/
+├── chat-service
+│   ├── build.gradle
+│   └── src/
+├── match-service
+│   ├── build.gradle
+│   └── src/
+├── member-service
+│   ├── build.gradle
+│   └── src/
+├── notification-service
+│   ├── build.gradle
+│   └── src/
+├── payment-service
+│   ├── build.gradle
+│   └── src
+├── docker
+│   └── mysql
+├── build.gradle
+├── settings.gradle
+├── docker-compose.yaml
+└── env.example
+```
+- member-service : 회원 도메인 관리 및 인증/인가 처리
+- match-service : 매칭 도메인 로직 및 비즈니스 규칙 처리
+- chat-service : WebSocket 기반 실시간 채팅 서비스
+- payment-service : 결제 처리 및 트랜잭션 관리 모듈
+- notification-service : FCM 기반 실시간 알림 서비스
+
+<br/><br/>
+
+## 🚀 로컬 실행 방법
 
 ### 1. 환경변수 설정
 
@@ -23,38 +100,8 @@ docker-compose ps
 docker-compose rm -sf ${서비스명}  # ex) 서비스 명: localstack
 ```
 
-## flyway 관련 명령
-### flway 초기화
+### flyway 관련 명령
+- flway 초기화
 ```shell
 ./gradlew :member-service:flywayClean # member-service 자리에 다른 서비스 이름이 와도 된다.
-```
-
-
-## 📁 프로젝트 구조
-```shell
-├── common
-│   ├── build
-│   ├── build.gradle
-│   └── src
-├── chat-service
-│   ├── build.gradle
-│   └── src
-├── match-service
-│   ├── build.gradle
-│   └── src
-├── member-service
-│   ├── build.gradle
-│   └── src
-├── notification-service
-│   ├── build.gradle
-│   └── src
-├── payment-service
-│   ├── build.gradle
-│   └── src
-├── docker
-│   └── mysql
-├── build.gradle
-├── settings.gradle
-├── docker-compose.yaml
-└── env.example
 ```
