@@ -4,6 +4,12 @@
 
 <img width="1600" alt="비비" src="https://github.com/user-attachments/assets/ff195871-0a1a-44f6-8f5e-3e6e35f24546" />
 
+### Team Members
+|                           <a href="https://github.com/MinJaeSon"><img src="https://github.com/MinJaeSon.png" width=120/></a>                           |                          <a href="https://github.com/khw7385"><img src="https://github.com/khw7385.png" width=120/></a>                           |                       <a href="https://github.com/Hannaoo1"><img src="https://github.com/Hannaoo1.png" width=120 /></a>                        |                         <a href="https://github.com/YongjaeKwon0629"><img src="https://github.com/YongjaeKwon0629.png" width=120/></a>                          |                         <a href="https://github.com/doteeth83"><img src="https://github.com/doteeth83.png" width=120/></a>                          |                         <a href="https://github.com/minsunmanju"><img src="https://github.com/minsunmanju.png" width=120/></a>                          |
+|:-----------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------:|
+|                                     <a href="https://youthing.tistory.com/">손민재</a>                                     |                                 <a href="https://pingzeming.tistory.com/">김현원</a>                                  |                                  <a href="https://hochi-dev.tistory.com/">정한나</a>                                  |                                   <a href="https://velog.io/@maxgun98/posts">권용재</a>                                    |                                   <a href="https://velog.io/@seoyeon5117/posts/ ">고도희</a>                                    |                                   <a href="https://study-csa.tistory.com/">김민선</a>                                    |
+| Leader, BE | Infra, BE | BE  | BE, FE | Design, FE | FE |
+
 <br/><br/>
 
 ## 1. 프로젝트 개요
@@ -68,17 +74,17 @@
 ├── docker-compose.yaml
 └── env.example
 ```
-- member-service : 회원 도메인 관리 및 인증/인가 처리
-- match-service : 매칭 도메인 로직 및 비즈니스 규칙 처리
-- chat-service : WebSocket 기반 실시간 채팅 서비스
-- payment-service : 결제 처리 및 트랜잭션 관리 모듈
-- notification-service : FCM 기반 실시간 알림 서비스
+- **`member-service`** : 회원 도메인 관리 및 인증/인가 처리
+- **`match-service`** : 매칭 도메인 로직 및 비즈니스 규칙 처리
+- **`chat-service`** : WebSocket 기반 실시간 채팅 서비스
+- **`payment-service`** : 결제 처리 및 트랜잭션 관리 모듈
+- **`notification-service`** : FCM 기반 실시간 알림 서비스
 
 <br/><br/>
 
 ## 🚀 로컬 실행 방법
 
-### 1. 환경변수 설정
+### 1) 환경변수 설정
 
 ```shell
 # env.example 파일을 .env로 복사
@@ -88,7 +94,7 @@ cp env.example .env
 # 특히 JWT 시크릿 키는 반드시 변경해야 합니다!
 ```
 
-### 2. 인프라 서비스 실행
+### 2) 인프라 서비스 실행
 ```shell
 # Docker Compose로 MySQL, Redis 실행
 docker-compose up -d
