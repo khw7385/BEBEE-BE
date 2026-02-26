@@ -37,6 +37,8 @@
 
 <br/><br/>
 
+[📌 발표 자료 전체 보기](https://github.com/user-attachments/files/25568291/1._._.-compressed.pdf)
+
 ---
 
 <br/>
