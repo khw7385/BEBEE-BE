@@ -10,6 +10,7 @@ import java.util.List;
 
 @Component
 public class EventConfig {
+
     @Bean
     public ProcessedEventManager processedEventManager(ProcessedEventRepository processedEventRepository) {
         return new ProcessedEventManager(processedEventRepository);

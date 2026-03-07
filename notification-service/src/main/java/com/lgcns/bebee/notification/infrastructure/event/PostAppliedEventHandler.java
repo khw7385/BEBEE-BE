@@ -2,7 +2,7 @@ package com.lgcns.bebee.notification.infrastructure.event;
 
 import com.lgcns.bebee.common.data.event.EventHandler;
 import com.lgcns.bebee.common.data.event.match.PostAppliedEvent;
-import com.lgcns.bebee.notification.application.SendPushNotificationUseCase;
+import com.lgcns.bebee.notification.application.usecase.SendPushNotificationUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

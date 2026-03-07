@@ -205,13 +205,20 @@
 
         // Firebase 초기화
         document.getElementById('init-firebase').addEventListener('click', () => {
+
+            const authDomain = document.getElementById('authDomain').value.trim();
+            const projectId = document.getElementById('projectId').value.trim();
+            const storageBucket = document.getElementById('storageBucket').value.trim();
+            const messagingSenderId = document.getElementById('messagingSenderId').value.trim();
+            const appId = document.getElementById('appId').value.trim();
+
             const firebaseConfig = {
                 apiKey: document.getElementById('apiKey').value.trim(),
-                authDomain: document.getElementById('authDomain').value.trim(),
-                projectId: document.getElementById('projectId').value.trim(),
-                storageBucket: document.getElementById('storageBucket').value.trim(),
-                messagingSenderId: document.getElementById('messagingSenderId').value.trim(),
-                appId: document.getElementById('appId').value.trim()
+                authDomain: authDomain != null ? authDomain : "bebee-c4d61.firebaseapp.com",
+                projectId: projectId != null ? projectId : "bebee-c4d61",
+                storageBucket: storageBucket != null ? projectId : "bebee-c4d61.firebasestorage.app",
+                messagingSenderId: messagingSenderId != null ? messagingSenderId : "1024519360208",
+                appId: appId != null ? appId : "1:1024519360208:web:46d14c7ace75447756d8d5"
             };
 
             const vapidKey = document.getElementById('vapidKey').value.trim();
@@ -259,9 +266,37 @@
                 const permission = await Notification.requestPermission();
 
                 if (permission === 'granted') {
+                    showStatus('permission-status', 'info', '⏳ Service Worker 등록 중...');
+
+                    // Service Worker 등록 및 활성화 대기
+                    const registration = await navigator.serviceWorker.register('/fcm/firebase-messaging-sw.js');
+
+                    // Service Worker가 활성화될 때까지 대기
+                    if (registration.installing) {
+                        await new Promise((resolve) => {
+                            registration.installing.addEventListener('statechange', (e) => {
+                                if (e.target.state === 'activated') {
+                                    resolve();
+                                }
+                            });
+                        });
+                    } else if (registration.waiting) {
+                        await new Promise((resolve) => {
+                            registration.waiting.addEventListener('statechange', (e) => {
+                                if (e.target.state === 'activated') {
+                                    resolve();
+                                }
+                            });
+                        });
+                    }
+                    // 이미 active 상태면 바로 진행
+
                     showStatus('permission-status', 'info', '⏳ 토큰 생성 중...');
 
-                    const token = await getToken(messaging, { vapidKey });
+                    const token = await getToken(messaging, {
+                        vapidKey,
+                        serviceWorkerRegistration: registration
+                    });
 
                     if (token) {
                         currentToken = token;

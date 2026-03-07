@@ -1,6 +1,7 @@
 package com.lgcns.bebee.notification.application;
 
 import com.lgcns.bebee.notification.application.client.PushNotificationClient;
+import com.lgcns.bebee.notification.application.usecase.SendPushNotificationUseCase;
 import com.lgcns.bebee.notification.domain.entity.*;
 import com.lgcns.bebee.notification.domain.repository.AppNotificationRepository;
 import com.lgcns.bebee.notification.domain.service.PushNotificationSubscriptionManagement;

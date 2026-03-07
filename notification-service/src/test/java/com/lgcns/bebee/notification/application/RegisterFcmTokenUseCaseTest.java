@@ -1,5 +1,6 @@
 package com.lgcns.bebee.notification.application;
 
+import com.lgcns.bebee.notification.application.usecase.RegisterFcmTokenUseCase;
 import com.lgcns.bebee.notification.domain.entity.PushNotificationSubscription;
 import com.lgcns.bebee.notification.domain.repository.PushNotificationSubscriptionRepository;
 import com.lgcns.bebee.notification.domain.service.PushNotificationSubscriptionManagement;

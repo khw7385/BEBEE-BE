@@ -11,6 +11,9 @@
 
 server:
   port: ${NOTIFICATION_SERVICE_PORT:8084}
+  tomcat:
+    mbeanregistry:
+      enabled: true  # Tomcat 메트릭 활성화
 
 spring:
   datasource:
@@ -77,6 +80,19 @@ spring:
     # clean 명령 비활성화 (안전)
     # clean-disabled: true
 
+  cloud:
+    aws:
+      endpoint: ${AWS_ENDPOINT:http://localhost:4566}
+      region:
+        static: ap-northeast-2
+      credentials:
+        access-key: test
+        secret-key: test
+
+      sqs:
+        listener:
+          max-delay-between-polls: 10
+
 # Spring Doc 설정
 springdoc:
   api-docs:
@@ -90,6 +106,33 @@ springdoc:
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
 
+app:
+  sqs:
+    queue-url: "${AWS_SQS_QUEUE_ARN:http://sqs.ap-northeast-2.localhost.localstack.cloud:4566/000000000000/bebee-local-chat-queue}"
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info, metrics # 프로메테우스 엔드포인트 개방
+  endpoint:
+    prometheus:
+      access: read_only
+  metrics:
+    tags:
+      application: bebee-notification-service # 그라파나에서 구분하기 위한 태그
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        fcm.send.latency.per.message: true
+        fcm.send.latency: true
+      percentiles:
+        fcm.send.latency.per.message: 0.5, 0.95, 0.99
+        fcm.send.latency: 0.5, 0.95, 0.99
+        http.server.requests: 0.5, 0.95, 0.99  # p50, p95, p99
+
+
 
 # FCM 설정
 firebase:
@@ -97,6 +140,11 @@ firebase:
   service-account-key-path: ${FIREBASE_SERVICE_ACCOUNT_KEY_PATH:classpath:firebase/firebase-service-account.json}
 
   # FCM 메시지 옵션
+
+push:
+  batch:
+    mode: ${PUSH_BATCH_MODE:synchronized}
+
 
 # 로깅 설정
 logging:
@@ -108,4 +156,8 @@ logging:
     p6spy: INFO
 
     com.lgcns.bebee.notification: ${LOGGING_LEVEL_SERVICE:info}
+
+#    com.google.auth: DEBUG
+#    com.google.firebase: DEBUG
+#    com.google.api.client.http: DEBUG
 

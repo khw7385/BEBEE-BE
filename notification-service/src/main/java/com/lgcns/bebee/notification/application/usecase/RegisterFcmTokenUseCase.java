@@ -1,4 +1,4 @@
-package com.lgcns.bebee.notification.application;
+package com.lgcns.bebee.notification.application.usecase;
 
 import com.lgcns.bebee.common.application.Params;
 import com.lgcns.bebee.common.application.UseCase;
