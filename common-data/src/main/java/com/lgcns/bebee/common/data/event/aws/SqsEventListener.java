@@ -12,12 +12,13 @@ import org.springframework.messaging.handler.annotation.Payload;
 
 @Slf4j
 @RequiredArgsConstructor
-public class SqsEventListener {
+public class SqsEventListener implements EventListener {
     private final ObjectMapper objectMapper;
     private final EventTypeMapper eventTypeMapper;
     private final EventHandlerRegistry handlerRegistry;
     private final ProcessedEventManager processedEventManager;
 
+    @Override
     @SqsListener("${app.sqs.queue-url}")
     public void handleEvent(@Payload String payload, @Header("eventType") String eventType) {
         EventEnvelope envelope = parseEnvelope(payload, eventType);

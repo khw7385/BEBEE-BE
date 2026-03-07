@@ -1,0 +1,91 @@
+# ========================================
+# Prometheus 설정 파일
+# ========================================
+#
+# Spring Boot Actuator 엔드포인트에서 메트릭을 수집합니다.
+# 각 서비스의 /actuator/prometheus 엔드포인트를 스크래핑합니다.
+#
+# 참고: host.docker.internal은 Docker 컨테이너에서 호스트 머신에 접근할 때 사용
+
+global:
+  scrape_interval: 15s          # 메트릭 수집 주기 (기본값)
+  evaluation_interval: 15s      # 규칙 평가 주기
+
+# 스크래핑 설정
+scrape_configs:
+  # ========================================
+  # Prometheus 자체 메트릭
+  # ========================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ========================================
+  # Gateway Service
+  # ========================================
+  - job_name: 'gateway-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+        labels:
+          application: 'gateway-service'
+
+  # ========================================
+  # Member Service
+  # ========================================
+  - job_name: 'member-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8082']
+        labels:
+          application: 'member-service'
+
+  # ========================================
+  # Chat Service
+  # ========================================
+  - job_name: 'chat-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+        labels:
+          application: 'chat-service'
+
+  # ========================================
+  # Match Service
+  # ========================================
+  - job_name: 'match-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8083']
+        labels:
+          application: 'match-service'
+
+  # ========================================
+  # Notification Service
+  # ========================================
+  - job_name: 'notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8084']
+        labels:
+          application: 'notification-service'
+
+  # ========================================
+  # Payment Service
+  # ========================================
+  - job_name: 'payment-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8085']
+        labels:
+          application: 'payment-service'
+
+  # ========================================
+  # File Service
+  # ========================================
+  - job_name: 'file-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8086']
+        labels:
+          application: 'file-service'

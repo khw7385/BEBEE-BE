@@ -98,6 +98,50 @@ services:
     networks:
       - bebee-network
 
+  # ========================================
+  # Prometheus 모니터링 서비스
+  # ========================================
+  # 메트릭 수집 및 저장을 담당하는 시계열 데이터베이스
+  # Spring Boot Actuator의 /actuator/prometheus 엔드포인트에서 메트릭 수집
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"                                           # Prometheus Web UI 포트
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml  # 설정 파일 마운트
+      - prometheus_data:/prometheus                           # 데이터 영속성
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'        # 설정 파일 경로
+      - '--storage.tsdb.path=/prometheus'                     # 데이터 저장 경로
+      - '--web.enable-lifecycle'                              # HTTP API로 설정 리로드 가능
+    restart: unless-stopped
+    networks:
+      - bebee-network
+
+  # ========================================
+  # Grafana 대시보드 서비스
+  # ========================================
+  # Prometheus에서 수집한 메트릭을 시각화하는 대시보드
+  # 기본 로그인: admin / admin
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"                                           # Grafana Web UI 포트
+    volumes:
+      - grafana_data:/var/lib/grafana                         # 데이터 영속성
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning  # 자동 프로비저닝 설정
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin                          # 관리자 계정
+      - GF_SECURITY_ADMIN_PASSWORD=admin                      # 관리자 비밀번호
+      - GF_USERS_ALLOW_SIGN_UP=false                          # 회원가입 비활성화
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - bebee-network
+
 # ========================================
 # 볼륨 정의 (Volumes)
 # ========================================
@@ -106,6 +150,8 @@ volumes:
   redis_data:
   mongo_data:
   localstack_data:
+  prometheus_data:
+  grafana_data:
 
 # ========================================
 # 네트워크 정의 (Networks)

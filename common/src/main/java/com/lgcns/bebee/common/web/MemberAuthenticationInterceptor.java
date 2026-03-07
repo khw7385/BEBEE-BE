@@ -24,7 +24,7 @@ public class MemberAuthenticationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        log.info("인증 인터셉터 진입: URI={}, Method={}", request.getRequestURI(), request.getMethod());
+//        log.info("인증 인터셉터 진입: URI={}, Method={}", request.getRequestURI(), request.getMethod());
         if (handler instanceof HandlerMethod) {
             String memberId = extractMemberId(request);
             request.setAttribute(MEMBER_KEY, memberId);
