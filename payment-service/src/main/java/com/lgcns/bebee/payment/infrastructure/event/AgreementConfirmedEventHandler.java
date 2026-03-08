@@ -1,8 +1,11 @@
 package com.lgcns.bebee.payment.infrastructure.event;
 
 
+import com.lgcns.bebee.common.data.event.DomainEventPublisher;
 import com.lgcns.bebee.common.data.event.match.AgreementConfirmedEvent;
 import com.lgcns.bebee.common.data.event.EventHandler;
+import com.lgcns.bebee.common.data.event.payment.PaymentFailedEvent;
+import com.lgcns.bebee.common.data.event.payment.PaymentSucceededEvent;
 import com.lgcns.bebee.payment.application.usecase.UseHoneyUseCase;
 import com.lgcns.bebee.payment.domain.entity.sync.EngagementType;
 import com.lgcns.bebee.payment.domain.entity.sync.PaymentAgreementSync;
@@ -22,6 +25,7 @@ public class AgreementConfirmedEventHandler implements EventHandler<AgreementCon
     private final UseHoneyUseCase useHoneyUseCase;
     private final AgreementRepository agreementRepository;
     private final MatchRepository matchRepository;
+    private final DomainEventPublisher eventPublisher;
 
     @Override
     public Class<AgreementConfirmedEvent> getEventClass() {
@@ -70,8 +74,25 @@ public class AgreementConfirmedEventHandler implements EventHandler<AgreementCon
                 event.getUnitHoney()
         );
 
-        useHoneyUseCase.execute(param);
+        try {
+            useHoneyUseCase.execute(param);
 
-        log.info("AgreementConfirmed 이벤트 처리 완료 - matchId: {}", event.getMatchId());
+            // 4. 결제 성공 이벤트 발행
+            eventPublisher.publish(new PaymentSucceededEvent(
+                    event.getMatchId(),
+                    event.getAgreementId(),
+                    event.getDisabledId()
+            ));
+
+            log.info("AgreementConfirmed 이벤트 처리 완료 - matchId: {}", event.getMatchId());
+        } catch (Exception e) {
+            log.error("결제 실패 - matchId: {}, reason: {}", event.getMatchId(), e.getMessage());
+            eventPublisher.publish(new PaymentFailedEvent(
+                    event.getMatchId(),
+                    event.getAgreementId(),
+                    event.getDisabledId()
+            ));
+            throw e;
+        }
     }
 }

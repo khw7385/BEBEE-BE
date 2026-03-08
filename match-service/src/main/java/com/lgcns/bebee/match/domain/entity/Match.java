@@ -1,6 +1,7 @@
 package com.lgcns.bebee.match.domain.entity;
 
 import com.lgcns.bebee.common.data.domain.BaseTimeEntity;
+import com.lgcns.bebee.match.domain.entity.vo.MatchStatus;
 import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -35,6 +36,10 @@ public class Match extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MatchStatus status = MatchStatus.PAYMENT_PENDING;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agreement_id", nullable = false, unique = true)
@@ -80,5 +85,13 @@ public class Match extends BaseTimeEntity {
         match.agreement = agreement;
 
         return match;
+    }
+
+    public void completePayment() {
+        this.status = MatchStatus.PAYMENT_COMPLETED;
+    }
+
+    public void cancel() {
+        this.status = MatchStatus.CANCELLED;
     }
 }

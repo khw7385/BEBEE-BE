@@ -161,6 +161,10 @@ public class Agreement extends BaseTimeEntity {
         this.status = AgreementStatus.CONFIRMED;
     }
 
+    public void cancel() {
+        this.status = AgreementStatus.CANCELLED;
+    }
+
     /**
      * 주어진 기간 내에서 이 Agreement의 활동이 있는 날짜들을 반환
      * <p>
