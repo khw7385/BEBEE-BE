@@ -33,7 +33,8 @@
 <br/><br/>
 
 ## 3. 시스템 아키텍처
-<img width="5760" height="3240" alt="백엔드 시스템 아키텍처" src="https://github.com/user-attachments/assets/3d17765e-3fe3-4f41-972e-e41dcbafff19" />
+<img width="5283" height="5163" alt="image" src="https://github.com/user-attachments/assets/33b0f51c-688b-4e78-bc10-2ed6499b6f18" />
+
 
 <br/><br/>
 
