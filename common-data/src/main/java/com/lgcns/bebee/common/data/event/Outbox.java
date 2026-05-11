@@ -37,7 +37,7 @@ public class Outbox extends BaseTimeEntity {
     private LocalDateTime nextRetryAt;
 
     public enum Status {
-        READY, PROCEEDING, DONE, FAILED
+        READY, DONE, FAILED
     }
 
     public static Outbox create(DomainEvent event, ObjectMapper objectMapper) {
@@ -52,11 +52,6 @@ public class Outbox extends BaseTimeEntity {
             throw new RuntimeException(e);
         }
         return outbox;
-    }
-    public void markAsReady() { this.status = Status.READY;}
-
-    public void markAsProceeding() {
-        this.status = Status.PROCEEDING;
     }
 
     public void markAsDone() {

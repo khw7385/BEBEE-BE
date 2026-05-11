@@ -3,15 +3,18 @@ package com.lgcns.bebee.common.data.event;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-public class OutboxRetryScheduler {
+public class OutboxProcessor {
     private final OutboxRepository outboxRepository;
     private final EventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
@@ -20,6 +23,21 @@ public class OutboxRetryScheduler {
     private static final int MAX_RETRY_COUNT = 3;
     private static final int BATCH_SIZE = 100;
     private static final int[] RETRY_DELAYS_SECONDS = {30, 60, 120};
+
+    @Async
+    @Transactional
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void publish(EventEnvelope envelope) {
+        Outbox outbox = outboxRepository.findByIdWithLock(envelope.eventId()).orElseThrow(() -> new IllegalStateException("Outbox를 찾을 수 없습니다: " + envelope.eventId()));
+        try{
+            eventPublisher.publish(envelope);
+            outbox.markAsDone();
+            log.info("이벤트 발행 성공 - eventId: {}, eventType: {}", envelope.eventId(), envelope.eventType());
+        }catch (Exception e){
+            outbox.markAsFailed();
+            log.error("이벤트 발행 실패 - eventId: {}, eventType: {}", envelope.eventId(), envelope.eventType(), e);
+        }
+    }
 
     @Scheduled(fixedDelay = 60 * 1000)
     @Transactional
@@ -56,8 +74,6 @@ public class OutboxRetryScheduler {
     }
 
     private void processOutbox(Outbox outbox) {
-        outbox.markAsProceeding();
-
         DomainEvent event = outbox.getEvent(objectMapper, eventTypeMapper);
         EventEnvelope envelope = EventEnvelope.from(outbox.getId(), event);
 
@@ -75,7 +91,7 @@ public class OutboxRetryScheduler {
             log.error("Outbox 최대 재시도 횟수 초과로 FAILED 처리 - ID: {}, EventType: {}",
                     outbox.getId(), outbox.getEventType(), e);
         } else {
-            int delaySeconds = RETRY_DELAYS_SECONDS[Math.min(outbox.getRetryCount() - 1, RETRY_DELAYS_SECONDS.length - 1)];
+            int delaySeconds = RETRY_DELAYS_SECONDS[Math.max(0, Math.min(outbox.getRetryCount() - 1, RETRY_DELAYS_SECONDS.length - 1))];
             LocalDateTime nextRetryAt = LocalDateTime.now().plusSeconds(delaySeconds);
             outbox.scheduleNextRetry(nextRetryAt);
             log.warn("Outbox 재처리 실패, 다음 재시도 예약 - ID: {}, RetryCount: {}, NextRetryAt: {}",
@@ -100,7 +116,7 @@ public class OutboxRetryScheduler {
             return;
         }
 
-        outboxRepository.deleteAll(oldOutboxes);
+        outboxRepository.deleteCompletedOutboxesBefore(threshold);
         log.info("=== Outbox 정리 완료: {}건 삭제 ===", oldOutboxes.size());
     }
 }
