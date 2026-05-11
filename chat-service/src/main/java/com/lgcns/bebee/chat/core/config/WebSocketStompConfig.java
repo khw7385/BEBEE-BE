@@ -59,19 +59,19 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
                 .setTimeToFirstMessage(30000);
     }
 
-//    @Bean
-//    public TaskScheduler heartBeatScheduler(){
-//        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-//        scheduler.setPoolSize(1);
-//        scheduler.setThreadNamePrefix("ws-heartbeat-thread-");
-//        scheduler.initialize();
-//        return scheduler;
-//    }
-
     @Bean
-    public ServletServerContainerFactoryBean createWebSocketContainer() {
-        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        container.setMaxSessionIdleTimeout(60 * 1000L);
-        return container;
+    public TaskScheduler heartBeatScheduler(){
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("ws-heartbeat-thread-");
+        scheduler.initialize();
+        return scheduler;
     }
+
+        @Bean
+        public ServletServerContainerFactoryBean createWebSocketContainer() {
+            ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+            container.setMaxSessionIdleTimeout(60 * 1000L);
+            return container;
+        }
 }

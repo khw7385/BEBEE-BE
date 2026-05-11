@@ -9,7 +9,6 @@ import com.lgcns.bebee.match.domain.entity.Engagement;
 import com.lgcns.bebee.match.domain.entity.Match;
 import com.lgcns.bebee.match.domain.entity.sync.MemberSync;
 import com.lgcns.bebee.match.domain.entity.sync.Role;
-import com.lgcns.bebee.match.domain.entity.vo.EngagementStatus;
 import com.lgcns.bebee.match.domain.service.EngagementManager;
 import com.lgcns.bebee.match.domain.service.MemberManager;
 import lombok.Getter;

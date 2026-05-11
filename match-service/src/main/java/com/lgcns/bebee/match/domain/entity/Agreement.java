@@ -162,7 +162,7 @@ public class Agreement extends BaseTimeEntity {
     }
 
     public void cancel() {
-        this.status = AgreementStatus.CANCELLED;
+        this.status = AgreementStatus.REFUSED;
     }
 
     /**
