@@ -22,9 +22,9 @@ spring:
       connection-test-query: SELECT 1
       validation-timeout: 5000
       maximum-pool-size: 10
-      minimum-idle: 5
-      idle-timeout: 30000
-      max-lifetime: 1800000
+      minimum-idle: 10
+#      idle-timeout: 30000
+#      max-lifetime: 1800000
 
   # JPA (Java Persistence API) 설정
   jpa:
@@ -60,7 +60,7 @@ spring:
   # Flyway 설정
   flyway:
     # Flyway 활성화
-    enabled: true
+    enabled: false
     # 마이그레이션 파일 위치
     locations:
       - classpath:db/migration
@@ -79,6 +79,19 @@ spring:
     placeholder-replacement: false
     # clean 명령 비활성화 (안전)
     # clean-disabled: true
+
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2  # 여기에 리전 명시
+      credentials:
+        access-key: test
+        secret-key: test
+      # LocalStack을 사용 중이라면 엔드포인트 설정도 확인하세요
+      sns:
+        endpoint: http://localstack:4566
+      sqs:
+        endpoint: http://localstack:4566
 
 springdoc:
   api-docs:
@@ -111,6 +124,33 @@ cors:
 
 event:
   type: "spring"
+
+app:
+  sns:
+    topic-arn: "${AWS_SNS_TOPIC_ARN:arn:aws:sns:ap-northeast-2:000000000000:bebee-local-match-topic}"
+  sqs:
+    queue-url: "${AWS_SQS_QUEUE_URL:http://sqs.ap-northeast-2.localhost.localstack.cloud:4566/000000000000/bebee-local-match-queue}"
+
+
+# Actuator & Prometheus 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info, metrics
+  endpoint:
+    prometheus:
+      access: read_only
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: match-service
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
 
 # 로깅 설정
 logging:

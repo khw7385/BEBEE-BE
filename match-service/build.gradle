@@ -23,6 +23,12 @@ dependencies {
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
+	// Spring Actuator - 어플리케이션 모니터링 및 관리 엔드포인트를 제공
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+	// 프로메테우스용 마이크로미터 레지스트리
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	// Spring Cloud AWS Starter - AWS 서비스 통합 위한 스타터 의존성
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter-sns:3.4.2'
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.4.2'

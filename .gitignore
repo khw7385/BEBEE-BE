@@ -60,3 +60,9 @@ temp/
 
 ### Uploaded Files ###
 member-service/uploads/
+
+# k6
+k6/results/
+
+# claude
+.claude
