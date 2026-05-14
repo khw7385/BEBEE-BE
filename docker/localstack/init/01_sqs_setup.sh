@@ -105,4 +105,4 @@ echo "=========================================="
 # 확인
 # ------------------------------------------
 echo "생성된 큐 목록:"
-awslocal sqs list-queues | jq -r '.QueueUrls[]' | grep "${PROJECT_NAME}-${ENVIRONMENT}"
+awslocal sqs list-queues --query 'QueueUrls' --output text | tr '\t' '\n'| grep "${PROJECT_NAME}-${ENVIRONMENT}"

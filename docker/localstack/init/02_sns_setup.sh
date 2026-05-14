@@ -30,6 +30,23 @@ SERVICES=("member" "match" "chat" "notification" "payment")
 # ------------------------------------------
 declare -A TOPIC_ARNS
 
+# 정책 JSON 정의
+RETRY_POLICY=$(cat << 'EOF' | tr -d '\n '
+{
+  "DeliveryPolicy": "{
+    \"http\": {
+      \"defaultHealthyRetryPolicy\": {
+        \"minDelayTarget\": 1,
+        \"maxDelayTarget\": 20,
+        \"numTries\": 3,
+        \"backOffFunction\": \"exponential\"
+      }
+    }
+  }"
+}
+EOF
+)
+
 for SERVICE in "${SERVICES[@]}"; do
   TOPIC_NAME="${PROJECT_NAME}-${ENVIRONMENT}-${SERVICE}-topic"
 
@@ -37,6 +54,7 @@ for SERVICE in "${SERVICES[@]}"; do
 
   TOPIC_ARN=$(awslocal sns create-topic \
     --name "${TOPIC_NAME}" \
+    --attributes "${RETRY_POLICY}" \
     --output text \
     --query 'TopicArn')
 
@@ -58,7 +76,7 @@ echo "=========================================="
 # 확인
 # ------------------------------------------
 echo "생성된 토픽 목록:"
-awslocal sns list-topics | jq -r '.Topics[].TopicArn' | grep "${PROJECT_NAME}-${ENVIRONMENT}"
+awslocal sns list-topics --query 'Topics[].TopicArn' --output text | tr '\t' '\n' | grep "${PROJECT_NAME}-${ENVIRONMENT}"
 
 # ------------------------------------------
 # 토픽 ARN을 파일에 저장 (다음 스크립트에서 사용)

@@ -93,11 +93,6 @@ FILTER_POLICIES["match:member"]='{
   ]
 }'
 
-
-
-# Notification 서비스: 모든 이벤트 수신 (예시)
-# FILTER_POLICIES["notification:match"]='{}'
-
 # ------------------------------------------
 # 구독 생성
 # ------------------------------------------
@@ -164,7 +159,7 @@ for SUB in "${SUBSCRIPTIONS[@]}"; do
 
         if [ $? -eq 0 ]; then
           echo "  ✓ 필터 정책 적용 완료"
-          echo "  Filter: $(echo $FILTER_POLICY | jq -c)"
+          echo "  Filter: $(echo $FILTER_POLICY)"
         else
           echo "  ✗ 필터 정책 적용 실패"
         fi
@@ -200,7 +195,7 @@ EOF
 
   awslocal sqs set-queue-attributes \
     --queue-url "${QUEUE_URL}" \
-    --attributes "Policy=${POLICY}"
+    --attributes "{\"Policy\":\"$(echo $POLICY | sed 's/"/\\"/g')\"}"
 
   if [ $? -eq 0 ]; then
     echo "✓ 큐 정책 설정 완료"
