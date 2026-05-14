@@ -11,8 +11,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
-public class EventHandlerRegistry {
+public class EventDispatcher {
     private final List<EventHandler<? extends DomainEvent>> eventHandlers;
     private Map<Class<? extends DomainEvent>, EventHandler<? extends DomainEvent>> handlerMap;
 
@@ -25,11 +26,18 @@ public class EventHandlerRegistry {
                 ));
     }
 
-    public EventHandler<? extends DomainEvent> getHandler(Class<? extends DomainEvent> eventClass) {
-        EventHandler<? extends DomainEvent> handler = handlerMap.get(eventClass);
+    public void dispatch(DomainEvent event) {
+        EventHandler<? extends DomainEvent> handler = handlerMap.get(event.getClass());
         if (handler == null) {
-            throw new IllegalStateException(String.format("[%s] 해당 이벤트에 대한 핸들러가 없습니다.", eventClass.getSimpleName()));
+            throw new IllegalStateException(
+                String.format("[%s] 해당 이벤트에 대한 핸들러가 없습니다.", event.getClass().getSimpleName())
+            );
         }
-        return handler;
+        callHandler(handler, event);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends DomainEvent> void callHandler(EventHandler<T> handler, DomainEvent event) {
+        handler.handle((T) event);
     }
 }

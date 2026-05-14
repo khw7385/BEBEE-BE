@@ -7,6 +7,7 @@ import com.lgcns.bebee.common.data.event.EventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
@@ -15,6 +16,8 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import java.util.Map;
 
 @Slf4j
+@Component
+@ConditionalOnProperty(name = "app.sns.enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class SnsEventPublisher implements EventPublisher {
     private final SnsClient snsClient;
