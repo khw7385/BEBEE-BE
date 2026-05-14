@@ -6,7 +6,9 @@ import com.lgcns.bebee.match.domain.entity.vo.EngagementType;
 import com.lgcns.bebee.match.domain.entity.vo.PostStatus;
 import com.lgcns.bebee.match.domain.repository.dto.PostSearchCond;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,30 +26,81 @@ import static com.lgcns.bebee.match.domain.entity.sync.QMemberDisabilityCategory
 @RequiredArgsConstructor
 public class PostRepositoryImpl implements PostRepositoryCustom {
     private final JPAQueryFactory queryFactory;
+    private final EntityManager entityManager;
+
+    // 쿼리 최적화 하기 전 게시글 조회
+//    @Override
+//    public List<Post> findPosts(PostSearchCond cond) {
+//        return queryFactory
+//                .selectFrom(post)
+//                .distinct()
+//                .leftJoin(post.period, postPeriod).fetchJoin()
+//                .leftJoin(post.helpCategories, postHelpCategory)
+//                .leftJoin(memberSync).on(memberSync.id.eq(post.memberId))
+//                .leftJoin(memberSync.disabilityCategories, memberDisabilityCategorySync)
+//                .leftJoin(postSchedule).on(postSchedule.post.id.eq(post.id))
+//                .where(
+//                        eqEngagementType(cond.engagementType()),
+//                        inLegalDongCodes(cond.legalDongCode()),
+//                        inHelpCategoryIds(cond.helpCategoryIds()),
+//                        eqGender(cond.gender()),
+//                        betweenHoney(cond.minHoney(), cond.maxHoney()),
+//                        inDisabilityCategoryIds(cond.disabilityCategoryId()),
+//                        inDayOfWeeks(cond.dayOfWeeks()),
+//                        inPostStatuses(cond.postStatuses()),
+//                        ltPostId(cond.lastPostId())
+//                )
+//                .orderBy(post.id.desc())
+//                .limit(cond.count())
+//                .fetch();
+//    }
+        // 세미 조인 & 쿼리 분리를 통한 최적화한 게시글 조회
+//    @Override
+//    public List<Post> findPosts(PostSearchCond cond){
+//        List<Long> ids = queryFactory.select(post.id)
+//                .from(post)
+//                .where(
+//                        eqEngagementType(cond.engagementType()),
+//                        inLegalDongCodes(cond.legalDongCode()),
+//                        betweenHoney(cond.minHoney(), cond.maxHoney()),
+//                        ltPostId(cond.lastPostId()),
+//                        inHelpCategoryIdsSemiJoin(cond.helpCategoryIds()),
+//                        inDisabilityCategoryIdsSemiJoin(cond.disabilityCategoryId()),
+//                        inDayOfWeeksSemiJoin(cond.dayOfWeeks())
+//                )
+//                .orderBy(post.id.desc())
+//                .limit(cond.count())
+//                .fetch();
+//
+//        return queryFactory.selectFrom(post)
+//                .leftJoin(post.period, postPeriod).fetchJoin()
+//                .where(post.id.in(ids))
+//                .orderBy(post.id.desc())
+//                .fetch();
+//    }
 
     @Override
-    public List<Post> findPosts(PostSearchCond cond) {
-        return queryFactory
-                .selectFrom(post)
-                .distinct()
-                .leftJoin(post.period, postPeriod).fetchJoin()
-                .leftJoin(post.helpCategories, postHelpCategory)
-                .leftJoin(memberSync).on(memberSync.id.eq(post.memberId))
-                .leftJoin(memberSync.disabilityCategories, memberDisabilityCategorySync)
-                .leftJoin(postSchedule).on(postSchedule.post.id.eq(post.id))
+    public List<Post> findPosts(PostSearchCond cond){
+        List<Long> postIds = queryFactory.select(post.id)
+                .from(post)
+                .setHint("org.hibernate.comment", "STRAIGHT_JOIN_HINT")
                 .where(
+                        ltPostId(cond.lastPostId()),
                         eqEngagementType(cond.engagementType()),
                         inLegalDongCodes(cond.legalDongCode()),
-                        inHelpCategoryIds(cond.helpCategoryIds()),
-                        eqGender(cond.gender()),
                         betweenHoney(cond.minHoney(), cond.maxHoney()),
-                        inDisabilityCategoryIds(cond.disabilityCategoryId()),
-                        inDayOfWeeks(cond.dayOfWeeks()),
-                        inPostStatuses(cond.postStatuses()),
-                        ltPostId(cond.lastPostId())
-                )
-                .orderBy(post.id.desc())
+                        inHelpCategoryIdsSemiJoin(cond.helpCategoryIds()),
+                        inDisabilityCategoryIdsSemiJoin(cond.disabilityCategoryId()),
+                        inDayOfWeeksSemiJoin(cond.dayOfWeeks())
+                ).orderBy(post.id.desc())
                 .limit(cond.count())
+                .fetch();
+
+        return queryFactory
+                .selectFrom(post)
+                .leftJoin(post.period, postPeriod).fetchJoin()
+                .where(post.id.in(postIds))
+                .orderBy(post.id.desc())
                 .fetch();
     }
 
@@ -67,6 +120,16 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 : null;
     }
 
+    private BooleanExpression inHelpCategoryIdsSemiJoin(List<Long> categoryIds) {
+        if (categoryIds == null || categoryIds.isEmpty()) return null;
+
+        return JPAExpressions
+                .selectOne()
+                .from(postHelpCategory)
+                .where(postHelpCategory.post.id.eq(post.id).and(postHelpCategory.id.helpCategoryId.in(categoryIds)))
+                .exists();
+    }
+
     private BooleanExpression eqGender(Gender gender) {
         return gender != null ? memberSync.gender.eq(gender) : null;
     }
@@ -75,6 +138,16 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return disabilityCategoryIds != null && !disabilityCategoryIds.isEmpty()
                 ? memberDisabilityCategorySync.id.disabilityCategoryId.in(disabilityCategoryIds)
                 : null;
+    }
+
+    private BooleanExpression inDisabilityCategoryIdsSemiJoin(List<Long> categoryIds){
+        if (categoryIds == null || categoryIds.isEmpty()) return null;
+
+        return JPAExpressions
+                .selectOne()
+                .from(memberDisabilityCategorySync)
+                .where(memberDisabilityCategorySync.member.id.eq(post.memberId).and(memberDisabilityCategorySync.id.disabilityCategoryId.in(categoryIds)))
+                .exists();
     }
 
     private BooleanExpression betweenHoney(Long minHoney, Long maxHoney) {
@@ -93,6 +166,17 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 ? postSchedule.dayOfWeek.in(dayOfWeeks)
                 : null;
     }
+
+    private BooleanExpression inDayOfWeeksSemiJoin(List<DayOfWeek> dayOfWeeks) {
+        if (dayOfWeeks == null || dayOfWeeks.isEmpty()) return null;
+
+        return JPAExpressions
+                .selectOne()
+                .from(postSchedule)
+                .where(postSchedule.post.id.eq(post.id).and(postSchedule.dayOfWeek.in(dayOfWeeks)))
+                .exists();
+    }
+
 
     private BooleanExpression inPostStatuses(List<PostStatus> postStatuses) {
         return postStatuses != null && !postStatuses.isEmpty()
