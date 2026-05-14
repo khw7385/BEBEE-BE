@@ -45,7 +45,10 @@ spring:
         hibernate:
           # SQL 쿼리 포맷팅 설정 (p6spy 사용으로 비활성화)
           format_sql: ${FORMAT_SQL:false}
-
+    properties:
+      hibernate:
+        # hibernate 주석 기능 사용
+        use_sql_comments: true
   # Redis 설정
   data:
     redis:
