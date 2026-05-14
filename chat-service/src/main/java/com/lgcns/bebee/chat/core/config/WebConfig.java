@@ -1,29 +1,20 @@
 package com.lgcns.bebee.chat.core.config;
 
-import com.lgcns.bebee.common.config.BaseWebConfig;
-import com.lgcns.bebee.common.properties.CorsProperties;
 import com.lgcns.bebee.common.web.CurrentMemberArgumentResolver;
 import com.lgcns.bebee.common.web.MemberAuthenticationInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
 @Configuration
-public class WebConfig extends BaseWebConfig {
+@RequiredArgsConstructor
+public class WebConfig implements WebMvcConfigurer {
     private final MemberAuthenticationInterceptor memberAuthenticationInterceptor;
     private final CurrentMemberArgumentResolver currentMemberArgumentResolver;
-
-    @Autowired
-    public WebConfig(CorsProperties corsProperties,
-                     MemberAuthenticationInterceptor memberAuthenticationInterceptor,
-                     CurrentMemberArgumentResolver currentMemberArgumentResolver) {
-        super(corsProperties);
-        this.memberAuthenticationInterceptor = memberAuthenticationInterceptor;
-        this.currentMemberArgumentResolver = currentMemberArgumentResolver;
-    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
